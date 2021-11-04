@@ -1,0 +1,3 @@
+# dockerignore
+assets/node_modules/
+deps/
