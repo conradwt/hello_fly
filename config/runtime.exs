@@ -32,6 +32,11 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
+  # IMPORTANT: Get the app_name we're using
+  app_name =
+    System.get_env("FLY_APP_NAME") ||
+      raise "FLY_APP_NAME not available"
+
   config :hello_fly, HelloFlyWeb.Endpoint,
     http: [
       # Enable IPv6 and bind on all interfaces.
