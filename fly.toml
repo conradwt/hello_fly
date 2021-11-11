@@ -8,7 +8,7 @@ kill_timeout = 5
 [env]
 
 [deploy]
-  release_command = "/app/bin/hello_fly eval HelloFly.Release.migrate"
+  release_command = "/home/conradwt/app/bin/hello_fly eval HelloFly.Release.migrate"
 
 [[services]]
   internal_port = 4000

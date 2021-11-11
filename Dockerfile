@@ -5,8 +5,10 @@ FROM hexpm/elixir:1.13.0-rc.0-erlang-24.1.4-alpine-3.13.6 as build
 # install build dependencies
 RUN apk add --no-cache build-base git python3 curl
 
+ENV USER="conradwt"
+
 # prepare build dir
-WORKDIR /app
+WORKDIR "/home/${USER}/app"
 
 # install hex + rebar
 RUN mix local.hex --force && \
@@ -51,17 +53,20 @@ FROM alpine:3.13.6 AS app
 RUN apk add --no-cache libstdc++ openssl ncurses-libs
 
 ARG MIX_ENV
+
+ENV MIX_ENV=prod
+ENV GROUP_ID=1000
+ENV PORT=4000
+ENV SECRET_KEY_BASE=nokey
 ENV USER="conradwt"
+ENV APP_PATH=/home/${USER}/app
 
-# WORKDIR "/home/${USER}/app"
-WORKDIR /app
-
-RUN chown nobody:nobody /app
+WORKDIR ${APP_PATH}
 
 # Creates an unprivileged user to be used exclusively to run the Phoenix app
 RUN \
   addgroup \
-   -g 1000 \
+   -g ${GROUP_ID} \
    -S "${USER}" \
   && adduser \
    -s /bin/sh \
@@ -71,14 +76,11 @@ RUN \
    -D "${USER}" \
   && su "${USER}"
 
+RUN chown ${USER}:${USER} ${APP_PATH}
+
 # Everything from this line onwards will run in the context of the unprivileged user.
 USER "${USER}"
 
-COPY --from=build --chown="${USER}":"${USER}" /app/_build/"${MIX_ENV}"/rel/hello_fly ./
-
-ENV HOME=/app
-ENV MIX_ENV=prod
-ENV SECRET_KEY_BASE=nokey
-ENV PORT=4000
+COPY --from=build --chown="${USER}":"${USER}" ${APP_PATH}/_build/"${MIX_ENV}"/rel/hello_fly ./
 
 CMD ["bin/hello_fly", "start"]
